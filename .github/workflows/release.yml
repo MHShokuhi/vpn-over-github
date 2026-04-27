@@ -114,6 +114,16 @@ jobs:
           path: dist/
           merge-multiple: true
 
+      - name: Publish Termux-named copies (Android ARMv8-A / ARMv7)
+        working-directory: dist
+        run: |
+          # Termux binaries are identical to linux/arm{64,v7}; rename so
+          # phone users can find them in the release page.
+          for prog in client server; do
+            cp "gh-tunnel-${prog}_linux_arm64"  "gh-tunnel-${prog}_termux_arm64"
+            cp "gh-tunnel-${prog}_linux_arm_v7" "gh-tunnel-${prog}_termux_arm_v7"
+          done
+
       - name: Generate SHA256 checksums
         working-directory: dist
         run: sha256sum * > sha256sums.txt
