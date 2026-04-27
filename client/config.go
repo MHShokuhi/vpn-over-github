@@ -99,8 +99,8 @@ func DefaultConfig() *Config {
 	cfg.SOCKS.BufferSize = 1 << 20 // 1 MiB
 
 	cfg.GitHub.UpstreamConnections = 1
-	cfg.GitHub.BatchInterval = 500 * time.Millisecond
-	cfg.GitHub.FetchInterval = 1000 * time.Millisecond
+	cfg.GitHub.BatchInterval = 1500 * time.Millisecond
+	cfg.GitHub.FetchInterval = 1500 * time.Millisecond
 	cfg.GitHub.APITimeout = 10 * time.Second
 
 	cfg.Encryption.Algorithm = "xor"
@@ -234,10 +234,10 @@ func validateClientConfig(cfg *Config) error {
 		cfg.GitHub.UpstreamConnections = 1
 	}
 	if cfg.GitHub.BatchInterval <= 0 {
-		cfg.GitHub.BatchInterval = 500 * time.Millisecond
+		cfg.GitHub.BatchInterval = 1500 * time.Millisecond
 	}
 	if cfg.GitHub.FetchInterval <= 0 {
-		cfg.GitHub.FetchInterval = 1000 * time.Millisecond
+		cfg.GitHub.FetchInterval = 1500 * time.Millisecond
 	}
 	if cfg.GitHub.APITimeout <= 0 {
 		cfg.GitHub.APITimeout = 10 * time.Second

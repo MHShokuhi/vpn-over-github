@@ -77,15 +77,15 @@ github:
     - token: "ghp_yourtoken"
       transport: "git"
       repo: "yourname/your-private-tunnel-repo"
-      batch_interval: 500ms      # git: ≥ 500ms keeps each push in time
-      fetch_interval: 1000ms
-    # gist alternative — 500 writes/hr/account secondary cap
+      batch_interval: 1500ms
+      fetch_interval: 1500ms
+    # gist alternative
     # - token: "ghp_yourtoken"
     #   transport: "gist"
-    #   batch_interval: 8000ms
-    #   fetch_interval: 1000ms
-  batch_interval: 500ms          # global defaults (used when token omits)
-  fetch_interval: 1000ms
+    #   batch_interval: 1500ms
+    #   fetch_interval: 1500ms
+  batch_interval: 1500ms         # global defaults (used when token omits)
+  fetch_interval: 1500ms
   api_timeout: 10s
 
 socks:

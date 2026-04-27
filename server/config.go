@@ -87,8 +87,8 @@ func DefaultServerConfig() *ServerConfig {
 	cfg.Proxy.TargetTimeout = 30 * time.Second
 	cfg.Proxy.BufferSize = 2 << 20 // 2 MiB
 	cfg.GitHub.UpstreamConnections = 1
-	cfg.GitHub.BatchInterval = 500 * time.Millisecond
-	cfg.GitHub.FetchInterval = 1000 * time.Millisecond
+	cfg.GitHub.BatchInterval = 1500 * time.Millisecond
+	cfg.GitHub.FetchInterval = 1500 * time.Millisecond
 	cfg.GitHub.APITimeout = 10 * time.Second
 	cfg.Encryption.Algorithm = "xor"
 	cfg.Logging.Level = "info"
@@ -147,10 +147,10 @@ func validateServerConfig(cfg *ServerConfig) error {
 		cfg.GitHub.UpstreamConnections = 1
 	}
 	if cfg.GitHub.BatchInterval <= 0 {
-		cfg.GitHub.BatchInterval = 500 * time.Millisecond
+		cfg.GitHub.BatchInterval = 1500 * time.Millisecond
 	}
 	if cfg.GitHub.FetchInterval <= 0 {
-		cfg.GitHub.FetchInterval = 1000 * time.Millisecond
+		cfg.GitHub.FetchInterval = 1500 * time.Millisecond
 	}
 	if cfg.Proxy.BufferSize <= 0 {
 		cfg.Proxy.BufferSize = 2 << 20 // 2 MiB

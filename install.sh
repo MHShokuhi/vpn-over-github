@@ -129,16 +129,12 @@ configure() {
     read -r -p "Encryption algorithm [xor/aes] (default: xor): " ALGO
     ALGO="${ALGO:-xor}"
 
-    # Per-transport defaults that respect GitHub rate limits:
-    #   git : no REST quota; 500 ms keeps each push completing in time.
-    #   gist: 500 writes/hr/account secondary cap → batch ≥ 8 s.
-    if [ "${TRANSPORT}" = "gist" ]; then
-        DEFAULT_BATCH_MS=8000
-        DEFAULT_FETCH_MS=1000
-    else
-        DEFAULT_BATCH_MS=500
-        DEFAULT_FETCH_MS=1000
-    fi
+    # Defaults: 1500 ms is large enough that each push completes in time on a
+    # typical home upload, and well clear of gist's 500 writes/hr/account cap
+    # (≥ 7.2 s would be required to last a full hour, but 1.5 s is fine for
+    # demo / interactive use).
+    DEFAULT_BATCH_MS=1500
+    DEFAULT_FETCH_MS=1500
 
     read -r -p "Batch interval in ms [default: ${DEFAULT_BATCH_MS}]: " BATCH_MS
     BATCH_MS="${BATCH_MS:-${DEFAULT_BATCH_MS}}"
