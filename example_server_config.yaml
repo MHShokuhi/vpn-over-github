@@ -1,19 +1,28 @@
 github:
   tokens:
-    - token: "ghp_your_other_server_token_here"
-      transport: "git"
+    # contents (recommended): one PUT per batch, ~250 ms RTT.
+    - token: "ghp_your_server_token_here"
+      transport: "contents"
       repo: "yourname/your-private-tunnel-repo"
-      batch_interval: 500ms
-      fetch_interval: 1000ms
+      batch_interval: 800ms
+      fetch_interval: 800ms
 
+    # git Smart HTTP — slower than contents, no REST quota.
+    # - token: "ghp_your_server_token_here"
+    #   transport: "git"
+    #   repo: "yourname/your-private-tunnel-repo"
+    #   batch_interval: 1500ms
+    #   fetch_interval: 1500ms
+
+    # gist — 500 writes/hr/account secondary cap.
     # - token: "ghp_your_server_token_here"
     #   transport: "gist"
-    #   batch_interval: 8000ms
-    #   fetch_interval: 1000ms
+    #   batch_interval: 1500ms
+    #   fetch_interval: 1500ms
 
   upstream_connections: 1
-  batch_interval: 500ms
-  fetch_interval: 1000ms
+  batch_interval: 800ms
+  fetch_interval: 800ms
   api_timeout: 10s
 
 cleanup:

@@ -680,11 +680,18 @@ func (m *MuxClient) initTokenChannels(ctx context.Context, tokenIdx int, transpo
 	return channels, nil
 }
 
+// usesRESTQuota returns true for transports backed by the GitHub REST API
+// (gist, contents) — these need rate-limiter pacing and header-based
+// remaining-quota updates. The git Smart HTTP transport is exempt.
+func usesRESTQuota(transport string) bool {
+	return transport == "gist" || transport == "contents"
+}
+
 func (m *MuxClient) acquireForToken(ctx context.Context, tokenIdx int) error {
 	if tokenIdx >= len(m.cfg.GitHub.Tokens) {
 		return nil
 	}
-	if m.cfg.GitHub.Tokens[tokenIdx].EffectiveTransport() != "gist" {
+	if !usesRESTQuota(m.cfg.GitHub.Tokens[tokenIdx].EffectiveTransport()) {
 		return nil
 	}
 	return m.rateLimiter.Acquire(ctx, tokenIdx)
@@ -696,7 +703,7 @@ func (m *MuxClient) afterTransportCall(tokenIdx int, transport shared.Transport)
 	if tokenIdx >= len(m.cfg.GitHub.Tokens) {
 		return
 	}
-	if m.cfg.GitHub.Tokens[tokenIdx].EffectiveTransport() != "gist" {
+	if !usesRESTQuota(m.cfg.GitHub.Tokens[tokenIdx].EffectiveTransport()) {
 		return
 	}
 	m.rateLimiter.UpdateFromHeaders(tokenIdx, transport.GetRateLimitInfo())

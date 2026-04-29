@@ -197,13 +197,16 @@ func (m tuiModel) View() string {
 	tokenIndent := strings.Repeat(" ", 26)
 
 	for _, t := range m.tokens {
-		isGit := t.Transport == "git" || t.Transport == ""
+		transport := t.Transport
+		if transport == "" {
+			transport = "git"
+		}
 		name := tuiPad(t.MaskedToken, 16)
-		kind := tuiPad(t.Transport, 4)
+		kind := tuiPad(transport, 8)
 		linePrefix := "  " + dimStyle.Render(name) + "  " + dimStyle.Render(kind) + "  "
 		apiStr := dimStyle.Render(fmt.Sprintf("  calls:%d", t.TotalAPICalls))
 
-		if isGit {
+		if transport == "git" {
 			b.WriteString(linePrefix)
 			b.WriteString(dimStyle.Render("git  no REST quota · ~25 concurrent · bandwidth-throttled"))
 			b.WriteString(apiStr)
@@ -247,7 +250,7 @@ func (m tuiModel) View() string {
 			restUsed = 0
 		}
 
-		// Row 1: REST primary quota (5000/hr)
+		// Row 1: REST primary quota (5000/hr) — applies to gist + contents.
 		renderBar(linePrefix, "REST r/h", restUsed, t.Total, 0.80)
 		b.WriteString(apiStr)
 		if !t.BackoffUntil.IsZero() && time.Now().Before(t.BackoffUntil) {
@@ -256,13 +259,13 @@ func (m tuiModel) View() string {
 		}
 		b.WriteByte('\n')
 
-		// Row 2: secondary write/min
-		renderBar(tokenIndent, "WRITE/min", t.WritesPerMin, 80, 0.80)
-		b.WriteByte('\n')
-
-		// Row 3: secondary write/hr
-		renderBar(tokenIndent, "WRITE/hr", t.WritesPerHour, 500, 0.80)
-		b.WriteByte('\n')
+		// Gist also has secondary write/min and write/hr caps; contents doesn't.
+		if transport == "gist" {
+			renderBar(tokenIndent, "WRITE/min", t.WritesPerMin, 80, 0.80)
+			b.WriteByte('\n')
+			renderBar(tokenIndent, "WRITE/hr", t.WritesPerHour, 500, 0.80)
+			b.WriteByte('\n')
+		}
 	}
 
 	b.WriteString(sep + "\n")

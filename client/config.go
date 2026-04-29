@@ -204,12 +204,12 @@ func validateClientConfig(cfg *Config) error {
 		if transport == "" {
 			transport = "git"
 		}
-		if transport != "gist" && transport != "git" {
-			return fmt.Errorf("token %d has unsupported transport %q (use 'gist' or 'git')", i+1, transport)
+		if transport != "gist" && transport != "git" && transport != "contents" {
+			return fmt.Errorf("token %d has unsupported transport %q (use 'gist', 'git', or 'contents')", i+1, transport)
 		}
-		if transport == "git" && tc.Repo == "" {
-			return fmt.Errorf("token %d uses transport=git but no repo is set "+
-				"(set token.repo to 'owner/repo')", i+1)
+		if (transport == "git" || transport == "contents") && tc.Repo == "" {
+			return fmt.Errorf("token %d uses transport=%s but no repo is set "+
+				"(set token.repo to 'owner/repo')", i+1, transport)
 		}
 	}
 	if cfg.SOCKS.Listen == "" {

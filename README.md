@@ -13,18 +13,25 @@ your app → SOCKS5 (client) → GitHub → server → internet
 
 Two transports, picked per-token:
 
-| Transport | Storage | PAT scope | Rate limit |
-|---|---|---|---|
-| **git** (recommended) | files in a private repo via git push/pull | `repo` | no REST quota; bandwidth-throttled |
-| **gist** | content in a private gist via REST API | `gist` | 500 writes/hr per account |
+| Transport | Storage | PAT scope | Rate limit | Notes |
+|---|---|---|---|---|
+| **contents** (recommended) | files in a private repo via REST Contents API | `repo` (or fine-grained `Contents: write`) | 5000 REST/hr/token | One PUT per batch, ~250 ms RTT |
+| **git** | files in a private repo via git push/pull | `repo` | no REST quota | ~800–1500 ms RTT (pack file overhead) |
+| **gist** | content in a private gist via REST API | `gist` | 500 writes/hr/account | for very-low-traffic only |
 
 ## Does it actually work?
 
-**Too slow. Not usable.** It's a proof-of-concept, not a real VPN. One tunnel round-trip
-is one git push + one fetch ≈ **1.5–2 s** even on a fast connection.
+**Slow. Mostly a proof-of-concept.** Tunnel round-trip is one push + one
+fetch:
 
-The tool exists because it's an interesting hack, not because GitHub is a
-good carrier for IP traffic.
+- `contents` (default): ~**800 ms** — usable for SSH, light browsing, text
+  chat. Telegram handshake completes inside its 10 s timeout.
+- `git`: ~**1.5–2 s** — same workloads but visibly laggier.
+- `gist`: rate-capped, only useful for very-low-rate traffic.
+
+Every TCP stream your app opens shares that single pipe, so a browser with
+6–8 parallel conns to one site gets a fraction each. Don't expect smooth
+1080p video or video calls — your link to GitHub is the ceiling.
 
 ## Install
 
@@ -71,18 +78,28 @@ override `transport`, `repo`, `batch_interval`, `fetch_interval`, and
 ```yaml
 github:
   tokens:
+    # Recommended: REST Contents API. ~250 ms per call.
     - token: "ghp_yourtoken"
-      transport: "git"
+      transport: "contents"
       repo: "yourname/your-private-tunnel-repo"
-      batch_interval: 1500ms
-      fetch_interval: 1500ms
-    # gist alternative
+      batch_interval: 800ms
+      fetch_interval: 800ms
+
+    # git Smart HTTP (slower, no REST quota):
+    # - token: "ghp_yourtoken"
+    #   transport: "git"
+    #   repo: "yourname/your-private-tunnel-repo"
+    #   batch_interval: 1500ms
+    #   fetch_interval: 1500ms
+
+    # gist (capped at 500 writes/hr/account):
     # - token: "ghp_yourtoken"
     #   transport: "gist"
     #   batch_interval: 1500ms
     #   fetch_interval: 1500ms
-  batch_interval: 1500ms         # global defaults (used when token omits)
-  fetch_interval: 1500ms
+
+  batch_interval: 800ms          # global defaults
+  fetch_interval: 800ms
   api_timeout: 10s
 
 socks:

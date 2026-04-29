@@ -114,14 +114,17 @@ configure() {
         err "Token is required."
     fi
 
-    read -r -p "Transport [gist/git] (default: git): " TRANSPORT
-    TRANSPORT="${TRANSPORT:-git}"
+    # contents (default) — REST Contents API, lowest latency.
+    # git      — git Smart HTTP push/pull, no REST quota, slightly slower.
+    # gist     — REST Gist API, capped at 500 writes/hr/account.
+    read -r -p "Transport [contents/git/gist] (default: contents): " TRANSPORT
+    TRANSPORT="${TRANSPORT:-contents}"
 
     REPO_LINE=""
-    if [ "${TRANSPORT}" = "git" ]; then
-        read -r -p "GitHub repo for git transport (owner/repo): " GIT_REPO
+    if [ "${TRANSPORT}" = "git" ] || [ "${TRANSPORT}" = "contents" ]; then
+        read -r -p "GitHub repo (owner/repo): " GIT_REPO
         if [ -z "${GIT_REPO}" ]; then
-            err "Repo is required for git transport."
+            err "Repo is required for git/contents transport."
         fi
         REPO_LINE="\n      repo: \"${GIT_REPO}\""
     fi
@@ -129,12 +132,15 @@ configure() {
     read -r -p "Encryption algorithm [xor/aes] (default: xor): " ALGO
     ALGO="${ALGO:-xor}"
 
-    # Defaults: 1500 ms is large enough that each push completes in time on a
-    # typical home upload, and well clear of gist's 500 writes/hr/account cap
-    # (≥ 7.2 s would be required to last a full hour, but 1.5 s is fine for
-    # demo / interactive use).
-    DEFAULT_BATCH_MS=1500
-    DEFAULT_FETCH_MS=1500
+    # Per-transport defaults:
+    #   contents → 800 ms — single PUT per push (~250 ms RTT).
+    #   git      → 1500 ms — pack-file push has higher per-call overhead.
+    #   gist     → 1500 ms (still well under the 500 writes/hr cap).
+    case "${TRANSPORT}" in
+        contents) DEFAULT_BATCH_MS=800;  DEFAULT_FETCH_MS=800  ;;
+        gist)     DEFAULT_BATCH_MS=1500; DEFAULT_FETCH_MS=1500 ;;
+        *)        DEFAULT_BATCH_MS=1500; DEFAULT_FETCH_MS=1500 ;;
+    esac
 
     read -r -p "Batch interval in ms [default: ${DEFAULT_BATCH_MS}]: " BATCH_MS
     BATCH_MS="${BATCH_MS:-${DEFAULT_BATCH_MS}}"

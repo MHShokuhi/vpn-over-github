@@ -8,10 +8,11 @@ import (
 	"github.com/sartoopjj/vpn-over-github/tests/mocks"
 )
 
-// Compile-time assertions: concrete transports must satisfy the new interface.
+// Compile-time assertions: concrete transports must satisfy the interface.
 var (
 	_ shared.Transport = (*shared.GitSmartHTTPClient)(nil)
 	_ shared.Transport = (*shared.GitHubGistClient)(nil)
+	_ shared.Transport = (*shared.GitHubContentsClient)(nil)
 )
 
 func TestGenerateConnID(t *testing.T) {

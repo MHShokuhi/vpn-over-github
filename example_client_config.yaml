@@ -1,13 +1,22 @@
 github:
   tokens:
-    # git: no REST quota. 500ms keeps each push completing in time.
-    - token: "ghp_your_other_token_here"
-      transport: "git"
+    # contents (recommended): GitHub Contents REST API. One PUT per batch,
+    # ~250 ms round-trip — fastest of the three. Counts against the 5000/hr
+    # primary REST quota (we use ~2400/hr at 1500 ms cadence).
+    - token: "ghp_your_token_here"
+      transport: "contents"
       repo: "yourname/your-private-tunnel-repo"
-      batch_interval: 1500ms
-      fetch_interval: 1500ms
+      batch_interval: 800ms
+      fetch_interval: 800ms
 
-    # gist: 500 writes/hr/account secondary cap → batch ≥ 8s.
+    # git: no REST quota, but each push runs the pack-file pipeline.
+    # - token: "ghp_your_token_here"
+    #   transport: "git"
+    #   repo: "yourname/your-private-tunnel-repo"
+    #   batch_interval: 1500ms
+    #   fetch_interval: 1500ms
+
+    # gist: 500 writes/hr/account secondary cap.
     # - token: "ghp_your_token_here"
     #   transport: "gist"
     #   batch_interval: 1500ms
@@ -17,8 +26,8 @@ github:
   upstream_connections: 1
 
   # Global defaults — used when a token doesn't override.
-  batch_interval: 1500ms
-  fetch_interval: 1500ms
+  batch_interval: 800ms
+  fetch_interval: 800ms
   api_timeout: 10s
 
 socks:

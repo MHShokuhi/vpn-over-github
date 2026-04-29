@@ -67,6 +67,14 @@ func main() {
 			}
 			clients[i] = rc
 			slog.Info("token transport", "index", i, "transport", "git", "repo", tc.Repo)
+		case "contents":
+			cc, err := shared.NewGitHubContentsClient(tc.Token, tc.Repo, &http.Client{Timeout: cfg.GitHub.APITimeout})
+			if err != nil {
+				slog.Error("contents transport init failed", "error", err, "token_index", i)
+				os.Exit(1)
+			}
+			clients[i] = cc
+			slog.Info("token transport", "index", i, "transport", "contents", "repo", tc.Repo)
 		default: // "gist"
 			clients[i] = shared.NewGitHubGistClient(tc.Token, &http.Client{Timeout: cfg.GitHub.APITimeout})
 			slog.Info("token transport", "index", i, "transport", "gist")

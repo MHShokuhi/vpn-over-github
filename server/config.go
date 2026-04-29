@@ -131,11 +131,11 @@ func validateServerConfig(cfg *ServerConfig) error {
 		if transport == "" {
 			transport = "git"
 		}
-		if transport != "gist" && transport != "git" {
-			return fmt.Errorf("github.tokens[%d] has unsupported transport %q (use gist or git)", i, transport)
+		if transport != "gist" && transport != "git" && transport != "contents" {
+			return fmt.Errorf("github.tokens[%d] has unsupported transport %q (use gist, git, or contents)", i, transport)
 		}
-		if transport == "git" && tc.Repo == "" {
-			return fmt.Errorf("github.tokens[%d] uses transport=git but no repo is set", i)
+		if (transport == "git" || transport == "contents") && tc.Repo == "" {
+			return fmt.Errorf("github.tokens[%d] uses transport=%s but no repo is set", i, transport)
 		}
 	}
 	algo := strings.ToLower(cfg.Encryption.Algorithm)
